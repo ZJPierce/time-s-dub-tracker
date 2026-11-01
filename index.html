@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow:wght@400;500;600;700&family=Chivo+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: stadium jumbotron hero (parlay odds + sweat graph), then one stacked "ticket stub" per leg, blame board last. Single committed dark look. */
+/* Layout: stadium jumbotron hero (parlay odds + sweat graph), then worst-person banner, did-their-part / idiots lists, then one card per leg. Single committed dark look. */
 :root{
   --field:#0d1320; --panel:#151d2c; --panel2:#1b2538; --line:#28344c;
   --ink:#eaf0f8; --mute:#8d9bb4; --led:#ffb627; --led-dim:#5c4417;
@@ -101,15 +101,24 @@ body{background:var(--field);color:var(--ink);font-family:var(--f-body);font-siz
 .pill{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .leg.hit .pill{color:var(--win)} .leg.dead .pill{color:var(--loss)} .leg.cook .pill{color:var(--win)}
 .leg.sweat .pill{color:var(--led)} .leg.dire .pill{color:var(--warn)} .leg.pre .pill{color:var(--mute)}
-.roast{grid-column:1/-1;font-size:14px;color:#c4cee0;border-top:1px dashed var(--line);padding-top:9px;font-style:italic}
 
-/* blame board */
-.blame{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.blame table{width:100%;border-collapse:collapse;font-size:14px}
-.blame td{padding:10px 14px;border-top:1px solid var(--line)}
-.blame tr:first-child td{border-top:0}
-.blame td.n{font-family:var(--f-mono);color:var(--mute);width:2.5em}
-.blame td.r{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+/* lists */
+.lists{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:600px){.lists{grid-template-columns:1fr}}
+.grp{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.grp h2{margin:0 0 6px;font-family:var(--f-display);font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:baseline}
+.grp h2 span{font-family:var(--f-mono);font-size:13px;color:var(--mute)}
+.grp.good h2{color:var(--win)} .grp.bad h2{color:var(--loss)}
+.grp ul{list-style:none;margin:0;padding:0}
+.grp li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.grp li:first-child{border-top:0}
+.grp li>div{min-width:0;flex:1}
+.grp .nmn{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp .smm{font-family:var(--f-mono);font-size:11px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp .pp{font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums;flex:none}
+.grp.good .pp{color:var(--win)} .grp.bad .pp{color:var(--ink)}
+.grp li.none{color:var(--mute);font-size:13px}
+.grp .mini{margin-right:0;width:32px;height:32px}
 .tag{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;color:var(--led)}
 .tag.bad{color:var(--loss)}
 
@@ -121,10 +130,10 @@ body{background:var(--field);color:var(--ink);font-family:var(--f-body);font-siz
 .leg.liab .av{transform:rotate(-8deg)}
 .pill.liabpill{color:var(--loss)!important;background:rgba(255,93,108,.12)}
 .shame{display:flex;gap:14px;align-items:center;margin-top:16px;padding:12px;border:1px dashed rgba(255,93,108,.55);border-radius:10px;background:rgba(255,93,108,.07);position:relative}
-.shame img{width:68px;height:68px;border-radius:8px;object-fit:cover;filter:grayscale(.6) contrast(1.2);transform:rotate(-4deg);flex:none;border:2px solid var(--loss)}
+.shame img{width:84px;height:84px;border-radius:8px;object-fit:cover;filter:grayscale(.6) contrast(1.2);transform:rotate(-4deg);flex:none;border:2px solid var(--loss)}
 .shame>div{min-width:0}
-.shame .st{font-family:var(--f-display);font-weight:900;font-size:13px;letter-spacing:.18em;color:var(--loss);text-transform:uppercase}
-.shame .nm{font-family:var(--f-display);font-weight:900;font-size:26px;text-transform:uppercase;line-height:1;overflow-wrap:anywhere}
+.shame .st{font-family:var(--f-display);font-weight:900;font-size:14px;letter-spacing:.18em;color:var(--loss);text-transform:uppercase}
+.shame .nm{font-family:var(--f-display);font-weight:900;font-size:32px;text-transform:uppercase;line-height:1;overflow-wrap:anywhere}
 .shame .ln{font-size:14px;color:#c4cee0;margin-top:3px}
 .sit{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;font-family:var(--f-mono);font-size:12px;color:var(--mute);background:var(--panel2);border-radius:8px;padding:8px 10px;min-width:0}
 .sit .dd{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;color:var(--ink)}
@@ -144,7 +153,7 @@ canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-in
   </div>
 
   <section class="tron" aria-live="polite">
-    <h1 id="headline">Seven degenerates. One slip.</h1>
+    <h1 id="headline">Kickoff at 1:00.</h1>
     <div class="sub" id="subline">Pulling the scoreboard…</div>
     <div class="board">
       <div>
@@ -157,13 +166,16 @@ canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-in
     <div class="shame" id="shame" hidden></div>
   </section>
 
-  <div class="ticker"><span id="ticker">Loading the trash talk…</span></div>
+  <div class="lists">
+    <section class="grp good"><h2>Did their part <span id="partN">0</span></h2><ul id="part"></ul></section>
+    <section class="grp bad"><h2>Idiots <span id="idiotN">0</span></h2><ul id="idiots"></ul></section>
+  </div>
+
+  <div class="ticker"><span id="ticker">Loading scores…</span></div>
 
   <div class="lab">The legs <span id="updated">--</span></div>
   <div class="legs" id="legs"></div>
 
-  <div class="lab">Blame board <span>ranked by who's carrying</span></div>
-  <div class="blame"><table id="blame"></table></div>
 
   <div class="foot">
     <div id="srcnote">Stats: ESPN public scoreboard + box score. Odds are a live model, not a sportsbook line.</div>
@@ -193,23 +205,13 @@ const PHOTOS = ["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYF
 CONFIG.legs.forEach((l,i)=>l.photo=PHOTOS[i]);
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/";
 
-/* ================= ROASTS ================= */
-const ROAST = {
-  pre:  ["{u} locked this in at 2am and has not reconsidered.","{u} says this one is 'free money'. Screenshot taken.","{p} has no idea {u} is depending on him.","{u} already told their spouse about the payout."],
-  cook: ["{u} is eating. Someone check on the rest of the slip.","{p} heard the group chat and took it personally.","{u} is typing… probably 'told you'.","{u} is about to be insufferable."],
-  sweat:["{u} has refreshed this page 14 times this drive.","Coin-flip territory. {u} is pacing the kitchen.","{p}, buddy, a little help for {u}?","{u} is negotiating with God."],
-  dire: ["{u}, we need to talk.","{u} is single-handedly torching this slip.","{p} has forgotten {u} exists. So should we.","{u} is praying to a god who also has the under.","{u} is now blaming the offensive coordinator. Classic."],
-  anchor:["Six guys rowing. {u} drilling a hole in the boat.","{u}'s leg is dragging this parlay like an anchor through mud.","Everyone else did their homework. {u} picked {p} off vibes.","If this misses, we already know whose name goes on the plaque: {u}.","{u}, the slip was fine before you touched it.","{u} is currently the most expensive friend in this chat.","Somebody take {u}'s phone away before next Sunday.","{u} is the reason we can't have nice things."],
-  hit:  ["CASHED. {u} has earned the right to talk in the chat today.","{u} delivered. Respect the process.","{p} came through. {u} is taking a victory lap.","Leg banked. {u} can relax. The rest of you cannot."],
-  dead: ["{u} killed the slip. Remember this face.","{u} took seven people's money and threw it in the ocean.","{u} is banned from making picks until further notice.","{u} owes the chat an apology, a round, and a written explanation.","We will never forget what {u} did to us.","{u}'s pick has been entered into evidence."]
+/* ================= COPY ================= */
+const WORST = {
+  pre:  ["Least likely to hit on paper."],
+  live: ["Sinking the slip.","Everyone is waiting on this guy.","The one leg holding us back."],
+  dead: ["Killed the slip.","This one's on him."]
 };
-const HEAD = {
-  pre:  ["Seven degenerates. One slip.","Kickoff loading. Hope loading."],
-  alive:["Still breathing. Barely.","The slip lives. Nobody move.","Sweat equity is at an all-time high."],
-  hot:  ["We are cooking right now.","Book a table. Not yet. But soon."],
-  dead: ["It's over. {u} did this.","{u} has ended the dream."],
-  won:  ["WE EATING TONIGHT.","Every leg hit. Frame this slip."]
-};
+const HEAD = { pre:"Kickoff at 1:00.", alive:"Slip is alive.", hot:"Slip is cooking.", dead:"{u} killed it.", won:"Every leg hit." };
 
 /* ================= MATH ================= */
 function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);
@@ -328,6 +330,10 @@ function demoStep(){
 }
 
 /* ================= RENDER ================= */
+function summ(r){const l=r.l,st=r.st;
+  const market=l.type==="td"?"Anytime TD":l.type==="rec"?`${l.line}+ rec`:`${l.line}+ rec yds`;
+  const prog=l.type==="td"?(st.td?"scored":"no TD yet"):l.type==="rec"?`${st.rec}/${l.line} rec`:`${st.recYds}/${l.line} yds`;
+  return `${l.player} ${market} · ${prog}`}
 const prev={};const history=[];let mode="connecting";
 const $=id=>document.getElementById(id);
 function legState(p,g){if(!g||g.state==="pre")return p>=1?"hit":"pre";if(p>=1)return"hit";if(p<=0)return"dead";if(p>=.65)return"cook";if(p>=.3)return"sweat";return"dire"}
@@ -367,7 +373,6 @@ function render({games,stats}){
     else{cur=l.type==="rec"?st.rec:st.recYds;goal=l.line;w=Math.min(100,cur/goal*100)}
     const unit=l.type==="td"?(st.td===1?"TD":"TDs"):l.type==="rec"?"rec":"yds";
     const extra=l.type==="yds"?`${st.rec} rec`:l.type==="rec"?`${st.recYds} yds`:`${st.recYds} rec yds`;
-    const roast=pickLine(isAnchor?ROAST.anchor:ROAST[state],l.user+state+(state==="pre"||state==="hit"||state==="dead"?"":Math.floor(minute/2))).replaceAll("{u}",l.user).replaceAll("{p}",l.player.split(" ").slice(-1)[0]);
     el.innerHTML=`
       <div class="who"><div class="av" style="background:${l.color}">${l.photo?`<img src="${l.photo}" alt="${l.user}">`:initials(l.user)}</div>
         <div><div class="u">${l.user}</div><div class="g">${gameLine(g,l)}</div></div></div>
@@ -376,8 +381,7 @@ function render({games,stats}){
       <div class="pick"><span class="pl">${l.player}</span><span class="mk">${market}${l.odds?` · <span class="mono">${l.odds}</span>`:""}</span><span class="pill">${LABEL[state]}</span>${isAnchor?'<span class="pill liabpill">Liability</span>':""}</div>
       ${g&&g.state==="in"?`<div class="sit"><div class="dd">${g.sit?.poss?`<span class="ball${g.sit.poss===l.team?" on":""}">${g.sit.poss===l.team?`${l.team} ball`:`${g.sit.poss} ball`}</span>`:""}<span>${g.detail}</span>${g.sit?.dd?`<span>${g.sit.dd}</span>`:""}${g.sit?.red?'<span class="rz">RED ZONE</span>':""}</div>${g.sit?.last?`<div class="lp">Last: ${g.sit.last}</div>`:""}</div>`:""}
       <div class="meter"><div class="bar${l.type==="td"&&st.td===0?"":""}"><i style="width:${w}%"></i></div>
-        <div class="mrow"><span><b>${cur}</b> / ${goal} ${unit}</span><span>${extra}${g&&g.state!=="pre"&&!st.found&&mode==="live"?" · not in box yet":""}</span></div></div>
-      <div class="roast">${roast}</div>`;
+        <div class="mrow"><span><b>${cur}</b> / ${goal} ${unit}</span><span>${extra}${g&&g.state!=="pre"&&!st.found&&mode==="live"?" · not in box yet":""}</span></div></div>`;
   }
 
   // hero
@@ -386,32 +390,32 @@ function render({games,stats}){
   let hk="alive";
   if(dead.length)hk="dead";else if(hit===rows.length)hk="won";else if(pre===rows.length)hk="pre";else if(parlay>=.35)hk="hot";
   const culprit=dead[0]?.l.user||"";
-  $("headline").textContent=pickLine(HEAD[hk],hk+Math.floor(minute/5)).replaceAll("{u}",culprit);
-  $("subline").textContent= hk==="dead"?`${dead.map(r=>r.l.user).join(" & ")} sank it. Remaining legs are now playing for pride.`
-    : hk==="won"?"All seven legs cashed. Someone go collect."
-    : anchorActive?`${anchor.l.user} is dragging the whole slip down (${anchor.l.player}, ${pct(anchor.p)}%). Everyone else did their part.`
-    : anchor?`Weakest link on paper: ${anchor.l.user} (${anchor.l.player}, ${pct(anchor.p)}%). We see you.`:"";
+  $("headline").textContent=HEAD[hk].replaceAll("{u}",culprit);
+  $("subline").textContent= hk==="won"?"All seven legs cashed.":`${hit} of ${rows.length} legs have hit.`;
   const bp=$("bigp");bp.innerHTML=`${pct(parlay)}<small>%</small>`;bp.style.color=hk==="dead"?"var(--loss)":hk==="won"?"var(--win)":"";
   $("fair").textContent=american(parlay);
   $("onein").textContent=parlay>0?Math.round(1/parlay).toLocaleString():"∞";
   $("tally").innerHTML=`<span class="chip win">${hit} cashed</span><span class="chip live">${live?alive.length+" alive · "+live+" games live":alive.length+" alive"}</span><span class="chip loss">${dead.length} dead</span>`;
   spark();
-  const villain=dead[0]||(anchorActive?anchor:null), sh=$("shame");
+  const villain=dead[0]||anchor, sh=$("shame");
   if(villain){
-    const pool=dead.length?ROAST.dead:ROAST.anchor;
-    const ln=pickLine(pool,"shame"+villain.l.user+Math.floor(minute/2)).replaceAll("{u}",villain.l.user).replaceAll("{p}",villain.l.player.split(" ").slice(-1)[0]);
-    sh.innerHTML=`${villain.l.photo?`<img src="${villain.l.photo}" alt="${villain.l.user}">`:""}<div><div class="st">${dead.length?"Slip killer":"Current liability"}</div><div class="nm">${villain.l.user}</div><div class="ln">${ln}</div></div>`;
+    const kind=dead.length?"dead":(villain.g&&villain.g.state!=="pre")?"live":"pre";
+    const ln=pickLine(WORST[kind],villain.l.user+kind+Math.floor(minute/3));
+    sh.innerHTML=`${villain.l.photo?`<img src="${villain.l.photo}" alt="${villain.l.user}">`:""}<div><div class="st">Doing the worst</div><div class="nm">${villain.l.user}</div><div class="ln">${ln} ${summ(villain)} · ${pct(villain.p)}%</div></div>`;
     sh.hidden=false;
   } else sh.hidden=true;
 
   // ticker
   const bits=rows.map(r=>`${r.l.user.toUpperCase()}: ${r.l.player} ${r.l.type==="td"?(r.st.td?"SCORED":"no TD yet"):(r.l.type==="rec"?r.st.rec+" rec":r.st.recYds+" yds")} (${pct(r.p)}%)`);
   const games2=Object.values(games).filter(g=>CONFIG.legs.some(l=>`${l.away}@${l.home}`===`${g.away.abbr}@${g.home.abbr}`)).map(g=>`${g.away.abbr} ${g.away.score}-${g.home.score} ${g.home.abbr} ${g.detail}`);
-  $("ticker").textContent=[...(anchorActive?[`LIABILITY ALERT: ${anchor.l.user.toUpperCase()} IS SINKING US`]:[]),...(dead.length?[`SLIP KILLER: ${dead[0].l.user.toUpperCase()}`]:[]),...games2,...bits].join("   ///   ");
+  $("ticker").textContent=[...(villain?[`WORST: ${villain.l.user.toUpperCase()}`]:[]),...games2,...bits].join("   ///   ");
 
-  // blame board
-  const ranked=[...rows].sort((a,b)=>b.p-a.p);
-  $("blame").innerHTML=ranked.map((r,k)=>`<tr><td class="n">${k+1}</td><td>${r.l.photo?`<img class="mini" src="${r.l.photo}" alt="">`:""}${r.l.user}${k===0&&r.p>0?'<span class="tag">carrying</span>':""}${r===anchor?'<span class="tag bad">liability</span>':""}${r.state==="dead"?'<span class="tag bad">penalty box</span>':""}</td><td class="r">${pct(r.p)}%</td></tr>`).join("");
+  // did their part / idiots
+  const row=r=>`<li>${r.l.photo?`<img class="mini" src="${r.l.photo}" alt="">`:""}<div><div class="nmn">${r.l.user}</div><div class="smm">${summ(r)}</div></div><span class="pp">${r.state==="hit"?"HIT":r.state==="dead"?"DEAD":pct(r.p)+"%"}</span></li>`;
+  const done=rows.filter(r=>r.state==="hit"), idiots=rows.filter(r=>r.state!=="hit").sort((a,b)=>a.p-b.p);
+  $("partN").textContent=done.length; $("idiotN").textContent=idiots.length;
+  $("part").innerHTML=done.length?done.map(row).join(""):'<li class="none">Nobody yet.</li>';
+  $("idiots").innerHTML=idiots.length?idiots.map(row).join(""):'<li class="none">Nobody. Every leg hit.</li>';
   $("updated").textContent="updated "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"});
 }
 
