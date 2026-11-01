@@ -158,7 +158,7 @@ canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-in
     <div class="board">
       <div>
         <div class="bigp" id="bigp">--<small>%</small></div>
-        <div class="oddsrow"><span>fair odds <b id="fair">--</b></span><span>1 in <b id="onein">--</b></span></div>
+        <div class="oddsrow"><span>all 7 legs combined</span><span>fair odds <b id="fair">--</b></span><span>1 in <b id="onein">--</b></span></div>
       </div>
       <svg class="spark" id="spark" viewBox="0 0 400 90" preserveAspectRatio="none" aria-label="Parlay probability over time"></svg>
     </div>
@@ -227,6 +227,7 @@ function legProb(leg,st,g){
   if(st.recYds>=leg.line)return 1;if(f<=0)return 0;
   const m=leg.mu*f,s=Math.max(5,leg.sd*Math.sqrt(f));return 1-Phi((leg.line-0.5-st.recYds-m)/s);
 }
+const heroPct=p=>p<=0?"0":p>=1?"100":p<0.01?p*100>=0.01?(p*100).toFixed(2):"<0.01":p<0.1?(p*100).toFixed(1):String(Math.round(p*100));
 const pct=p=>p>=0.995&&p<1?"99":p>0&&p<0.01?"<1":String(Math.round(p*100));
 function american(p){if(p<=0)return"—";if(p>=1)return"LOCK";if(p>=0.5)return"-"+Math.round(100*p/(1-p));return"+"+Math.round(100*(1-p)/p).toLocaleString()}
 const norm=s=>(s||"").toLowerCase().normalize("NFD").replace(/[^a-z]/g,"");
@@ -391,8 +392,8 @@ function render({games,stats}){
   if(dead.length)hk="dead";else if(hit===rows.length)hk="won";else if(pre===rows.length)hk="pre";else if(parlay>=.35)hk="hot";
   const culprit=dead[0]?.l.user||"";
   $("headline").textContent=HEAD[hk].replaceAll("{u}",culprit);
-  $("subline").textContent= hk==="won"?"All seven legs cashed.":`${hit} of ${rows.length} legs have hit.`;
-  const bp=$("bigp");bp.innerHTML=`${pct(parlay)}<small>%</small>`;bp.style.color=hk==="dead"?"var(--loss)":hk==="won"?"var(--win)":"";
+  $("subline").textContent= hk==="won"?"All seven legs cashed.":`Each leg's live odds multiplied together. ${hit} of ${rows.length} legs have hit so far.`;
+  const bp=$("bigp");bp.innerHTML=`${heroPct(parlay)}<small>%</small>`;bp.style.color=hk==="dead"?"var(--loss)":hk==="won"?"var(--win)":"";
   $("fair").textContent=american(parlay);
   $("onein").textContent=parlay>0?Math.round(1/parlay).toLocaleString():"∞";
   $("tally").innerHTML=`<span class="chip win">${hit} cashed</span><span class="chip live">${live?alive.length+" alive · "+live+" games live":alive.length+" alive"}</span><span class="chip loss">${dead.length} dead</span>`;
