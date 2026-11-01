@@ -173,7 +173,7 @@ canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-in
 
   <div class="ticker"><span id="ticker">Loading scores…</span></div>
 
-  <div class="lab">The legs <span id="updated">--</span></div>
+  <div class="lab">The legs, most likely first <span id="updated">--</span></div>
   <div class="legs" id="legs"></div>
 
 
@@ -385,6 +385,15 @@ function render({games,stats}){
         <div class="mrow"><span><b>${cur}</b> / ${goal} ${unit}</span><span>${extra}${g&&g.state!=="pre"&&!st.found&&mode==="live"?" · not in box yet":""}</span></div></div>`;
   }
 
+  // sort cards: most likely to hit on top, smooth slide when order changes
+  const order=[...rows].sort((a,b)=>b.p-a.p||a.i-b.i).map(r=>"leg"+r.i);
+  if(order.join()!==[...box.children].map(e=>e.id).join()){
+    const first={};for(const el of box.children)first[el.id]=el.getBoundingClientRect().top;
+    order.forEach(id=>box.appendChild($(id)));
+    if(!matchMedia("(prefers-reduced-motion: reduce)").matches)
+      for(const el of box.children){const dy=first[el.id]-el.getBoundingClientRect().top;
+        if(dy)el.animate([{transform:`translateY(${dy}px)`},{transform:"none"}],{duration:550,easing:"cubic-bezier(.2,.8,.2,1)"})}
+  }
   // hero
   const live=rows.filter(r=>r.g&&r.g.state==="in").length, hit=rows.filter(r=>r.state==="hit").length,
         dead=rows.filter(r=>r.state==="dead"), pre=rows.filter(r=>r.state==="pre").length;
