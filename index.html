@@ -126,6 +126,12 @@ body{background:var(--field);color:var(--ink);font-family:var(--f-body);font-siz
 .shame .st{font-family:var(--f-display);font-weight:900;font-size:13px;letter-spacing:.18em;color:var(--loss);text-transform:uppercase}
 .shame .nm{font-family:var(--f-display);font-weight:900;font-size:26px;text-transform:uppercase;line-height:1;overflow-wrap:anywhere}
 .shame .ln{font-size:14px;color:#c4cee0;margin-top:3px}
+.sit{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;font-family:var(--f-mono);font-size:12px;color:var(--mute);background:var(--panel2);border-radius:8px;padding:8px 10px;min-width:0}
+.sit .dd{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;color:var(--ink)}
+.sit .ball{color:var(--led);font-weight:600}
+.sit .ball.on{color:var(--win)}
+.sit .rz{color:var(--loss);border:1px solid currentColor;border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.06em}
+.sit .lp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -242,8 +248,12 @@ function parseGames(sb){
     const a=c.competitors.find(x=>x.homeAway==="away"),h=c.competitors.find(x=>x.homeAway==="home");
     const st=ev.status||c.status||{};
     const key=`${a.team.abbreviation}@${h.team.abbreviation}`;
+    const ids={[a.team.id]:a.team.abbreviation,[h.team.id]:h.team.abbreviation,[a.id]:a.team.abbreviation,[h.id]:h.team.abbreviation};
+    const si=c.situation||{};
+    const sit={poss:si.possession?ids[si.possession]||null:null,dd:si.downDistanceText||si.shortDownDistanceText||"",
+      red:!!si.isRedZone,last:si.lastPlay?.text||""};
     out[key]={id:ev.id,state:st.type?.state||"pre",period:st.period||0,clock:st.clock||0,
-      detail:st.type?.shortDetail||"",date:ev.date,
+      detail:st.type?.shortDetail||"",date:ev.date,sit,
       away:{abbr:a.team.abbreviation,score:+a.score||0},home:{abbr:h.team.abbreviation,score:+h.score||0}};
   }
   return out;
@@ -309,7 +319,10 @@ function demoStep(){
     if(t<=0){state="pre"}else if(t>=3600){state="post";period=4;clock=0}
     if(t>=3600)clock=0;
     const mm=Math.floor(clock/60),ss=String(Math.floor(clock%60)).padStart(2,"0");
-    games[k]={state,period,clock,detail:state==="pre"?"Pregame":state==="post"?"Final":`${mm}:${ss} - ${["1st","2nd","3rd","4th"][period-1]}`,away:g.away,home:g.home};
+    const sideA=Math.random()<.5,po=sideA?g.away.abbr:g.home.abbr,de=sideA?g.home.abbr:g.away.abbr,yl=1+Math.floor(Math.random()*49);
+    const sit=state==="in"?{poss:po,dd:`${["1st","2nd","3rd","4th"][Math.floor(Math.random()*4)]} & ${1+Math.floor(Math.random()*10)} at ${Math.random()<.5?po:de} ${yl}`,
+      red:Math.random()<.18,last:["Pass complete for 12 yds","Run up the middle for 3 yds","Incomplete pass, overthrown","Sacked for a loss of 7","Screen pass, gain of 9"][Math.floor(Math.random()*5)]}:{};
+    games[k]={sit,state,period,clock,detail:state==="pre"?"Pregame":state==="post"?"Final":`${mm}:${ss} - ${["1st","2nd","3rd","4th"][period-1]}`,away:g.away,home:g.home};
   }
   return {games,stats:demo.stats.map(s=>({...s}))};
 }
@@ -361,6 +374,7 @@ function render({games,stats}){
       <div class="pr"><div class="pct">${pct(p)}%</div>
         <div class="dl ${d>0.005?"up":d<-0.005?"down":""}">${Math.abs(d)>0.005?(d>0?"▲ ":"▼ ")+Math.round(Math.abs(d)*100)+" pts":american(p)}</div></div>
       <div class="pick"><span class="pl">${l.player}</span><span class="mk">${market}${l.odds?` · <span class="mono">${l.odds}</span>`:""}</span><span class="pill">${LABEL[state]}</span>${isAnchor?'<span class="pill liabpill">Liability</span>':""}</div>
+      ${g&&g.state==="in"?`<div class="sit"><div class="dd">${g.sit?.poss?`<span class="ball${g.sit.poss===l.team?" on":""}">${g.sit.poss===l.team?`${l.team} ball`:`${g.sit.poss} ball`}</span>`:""}<span>${g.detail}</span>${g.sit?.dd?`<span>${g.sit.dd}</span>`:""}${g.sit?.red?'<span class="rz">RED ZONE</span>':""}</div>${g.sit?.last?`<div class="lp">Last: ${g.sit.last}</div>`:""}</div>`:""}
       <div class="meter"><div class="bar${l.type==="td"&&st.td===0?"":""}"><i style="width:${w}%"></i></div>
         <div class="mrow"><span><b>${cur}</b> / ${goal} ${unit}</span><span>${extra}${g&&g.state!=="pre"&&!st.found&&mode==="live"?" · not in box yet":""}</span></div></div>
       <div class="roast">${roast}</div>`;
